@@ -5,12 +5,6 @@ Data Summary
 - [Histograms](#histograms)
 - [Correlations](#correlations)
 
-<style type="text/css">
-code, pre {
-    font-family: Fira Code, Iosevka, Hack, monospace;
-}
-</style>
-
 ``` r
 pacman::p_load(dplyr,
                ggplot2,
@@ -79,10 +73,15 @@ for (i in 1:n_cols) {
           theme(legend.position = 'none')
 }
 
+# png('plots/histograms.png', height = 8.5, width = 11, units = 'in', res = 250)
 multiplot(plotlist = plots, cols = 3)
 ```
 
 ![](DataSummary_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
+
+``` r
+# dev.off()
+```
 
 # Correlations
 
@@ -104,3 +103,7 @@ ggplot(corr_mat, aes(x = var, y = y, fill=target)) +
 ```
 
 ![](DataSummary_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
+
+``` r
+# ggsave('plots/correlation.png')
+```

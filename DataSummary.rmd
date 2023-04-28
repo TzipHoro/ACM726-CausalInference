@@ -5,12 +5,6 @@ output:
     toc: true
 ---
 
-<style type="text/css">
-code, pre {
-    font-family: Fira Code, Iosevka, Hack, monospace;
-}
-</style>
-
 ```{r}
 pacman::p_load(dplyr,
                ggplot2,
