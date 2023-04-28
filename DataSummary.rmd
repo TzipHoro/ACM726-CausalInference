@@ -1,0 +1,70 @@
+---
+title: "Data Summary"
+output:
+  github_document:
+    toc: true
+---
+
+<style type="text/css">
+code, pre {
+    font-family: Fira Code, Iosevka, Hack, monospace;
+}
+</style>
+
+```{r}
+pacman::p_load(dplyr,
+               ggplot2,
+               ggthemes,
+               skimr,
+               gridExtra,
+               Rmisc)
+```
+
+# Data
+```{r}
+df <- read.csv(file = file.path('data', 'heart.csv'))
+X <- select(df, -target)
+y <- select(df, target)
+
+skim(df)
+```
+
+# Histograms
+```{r}
+col_names <- names(X)
+n_cols <- length(col_names)
+plots <- list()
+
+for (i in 1:n_cols) {
+  col_ <- col_names[i]
+  column <- sym(col_)
+
+  plots[[col_]] <- ggplot(df, aes(x = !!column, fill = as.factor(target))) +
+          geom_histogram(alpha = 0.5, bins = 50) +
+          scale_fill_fivethirtyeight() +
+          theme(legend.position = 'none')
+}
+
+# png('plots/histograms.png', height = 8.5, width = 11, units = 'in', res = 250)
+multiplot(plotlist = plots, cols = 3)
+# dev.off()
+```
+
+# Correlations
+```{r}
+corr_mat <- data.frame(cor(df))
+row_names <- row.names(corr_mat)
+corr_mat <- select(corr_mat, 'target')
+corr_mat$y <- rep(1, nrow(corr_mat))
+corr_mat$var <- row_names
+corr_mat <- corr_mat[!(row_names == 'target'),]
+
+ggplot(corr_mat, aes(x = var, y = y, fill=target)) +
+        geom_col() +
+        scale_fill_distiller(palette = 'PuBu', name = 'correlation') +
+        theme(axis.ticks.y = element_blank(),
+              axis.text.y = element_blank()) +
+        ylab(element_blank()) +
+        xlab(element_blank())
+# ggsave('plots/correlation.png')
+```
