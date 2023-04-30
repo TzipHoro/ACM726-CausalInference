@@ -37,15 +37,21 @@ ROCMetrics <- R6::R6Class (
       return(matr)
     },
     
-    roc_plot = function(threshold_matrix, file_name = NULL) {
+    roc_plot = function(threshold_matrix, title_prefix = NULL, file_name = NULL) {
       fpr <- 1 - threshold_matrix[, 'Specificity']
       tpr <- threshold_matrix[, 'Sensitivity']
       auc <- pracma::trapz(fpr, tpr)
       
+      if (!is.null(title_prefix)) {
+        title_ <- paste0(title_prefix, ' ROC Curve (AUC = ', round(auc, 4), ')')
+      } else {
+        title_ <- paste0('ROC Curve (AUC = ', round(auc, 4), ')')
+      }
+      
       plt <- ggplot2::ggplot(NULL, aes(x = fpr, y = tpr)) + 
         ggplot2::geom_line() +
         ggplot2::geom_area(fill = 'red', alpha = 0.5) +
-        ggplot2::ggtitle(paste0('ROC Curve (AUC = ', round(auc, 4), ')')) +
+        ggplot2::ggtitle(title_) +
         ggplot2::ylab('TPR') +
         ggplot2::xlab('FPR')
       

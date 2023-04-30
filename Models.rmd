@@ -14,7 +14,7 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 pacman::p_load(dplyr,
                fastDummies,
                caret,
-               reprtree,
+               bartMachine,
                stargazer
 )
 
@@ -85,8 +85,34 @@ tree_func(rf_mod$finalModel, 1, file_name = 'plots/rf_tree.png')
 ```{r}
 p_pred <- predict(rf_mod, X_test, type = 'prob')
 roc <- ROCMetrics$new(y_true = y_test, p_pred = p_pred$`1`)
-thresholds <- roc$threshold.matrix(0.0001)
+thresholds <- roc$threshold.matrix(0.001)
 roc$roc_plot(thresholds, file_name = 'plots/rf_roc.png')
+
+p_th <- row.names(thresholds)[which(thresholds$`Balanced Accuracy` == max(thresholds$`Balanced Accuracy`))]
+paste0('Optimal threshold: ', max(p_th))
+```
+
+# BART
+```{r}
+set_bart_machine_num_cores(4)
+
+X_train <- select(df_train, -target)
+y_train <- df_train$target
+
+bart_mod <- bartMachine(X = X_train, y = factor(y_train))
+bart_mod
+
+# partial dependency plots
+for (i in 1:ncol(X_train)) {
+  pd_plot(bart_mod, i)
+}
+```
+
+```{r}
+p_pred <- 1 - predict(bart_mod, X_test, type = 'prob')
+roc <- ROCMetrics$new(y_true = y_test, p_pred = p_pred)
+thresholds <- roc$threshold.matrix(0.001)
+roc$roc_plot(thresholds, file_name = 'plots/bart_roc.png')
 
 p_th <- row.names(thresholds)[which(thresholds$`Balanced Accuracy` == max(thresholds$`Balanced Accuracy`))]
 paste0('Optimal threshold: ', max(p_th))

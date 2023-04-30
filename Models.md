@@ -4,12 +4,13 @@ Data Summary
 - [Preprocess Data](#preprocess-data)
 - [Logistic Regression](#logistic-regression)
 - [Random Forests](#random-forests)
+- [BART](#bart)
 
 ``` r
 pacman::p_load(dplyr,
                fastDummies,
                caret,
-               reprtree,
+               bartMachine,
                stargazer
 )
 
@@ -136,7 +137,7 @@ thresholds <- roc$threshold.matrix(0.001)
 roc$roc_plot(thresholds, file_name = 'plots/lr_roc.png')
 ```
 
-![](C:\Users\tzipo\DOCUME~1\JHU\THEORY~2\ACM726~1\MODELS~1/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+![](Models_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
 
 ``` r
 p_th <- row.names(thresholds)[which(thresholds$`Balanced Accuracy` == max(thresholds$`Balanced Accuracy`))]
@@ -169,16 +170,16 @@ rf_mod$finalModel
 tree_func(rf_mod$finalModel, 1, file_name = 'plots/rf_tree.png')
 ```
 
-![](C:\Users\tzipo\DOCUME~1\JHU\THEORY~2\ACM726~1\MODELS~1/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+![](Models_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
 ``` r
 p_pred <- predict(rf_mod, X_test, type = 'prob')
 roc <- ROCMetrics$new(y_true = y_test, p_pred = p_pred$`1`)
-thresholds <- roc$threshold.matrix(0.0001)
+thresholds <- roc$threshold.matrix(0.001)
 roc$roc_plot(thresholds, file_name = 'plots/rf_roc.png')
 ```
 
-![](C:\Users\tzipo\DOCUME~1\JHU\THEORY~2\ACM726~1\MODELS~1/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+![](Models_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
 ``` r
 p_th <- row.names(thresholds)[which(thresholds$`Balanced Accuracy` == max(thresholds$`Balanced Accuracy`))]
@@ -186,3 +187,152 @@ paste0('Optimal threshold: ', max(p_th))
 ```
 
     ## [1] "Optimal threshold: 0.44"
+
+# BART
+
+``` r
+set_bart_machine_num_cores(4)
+```
+
+    ## bartMachine now using 4 cores.
+
+``` r
+X_train <- select(df_train, -target)
+y_train <- df_train$target
+
+bart_mod <- bartMachine(X = X_train, y = factor(y_train))
+```
+
+    ## bartMachine initializing with 50 trees...
+    ## bartMachine vars checked...
+    ## bartMachine java init...
+    ## bartMachine factors created...
+    ## bartMachine before preprocess...
+    ## bartMachine after preprocess... 22 total features...
+    ## bartMachine training data finalized...
+    ## Now building bartMachine for classification where "0" is considered the target level...
+    ## evaluating in sample data...done
+
+``` r
+bart_mod
+```
+
+    ## bartMachine v1.3.3.1 for classification
+    ## 
+    ## training data size: n = 615 and p = 22 
+    ## built in 1.6 secs on 4 cores, 50 trees, 250 burn-in and 1000 post. samples
+    ## 
+    ## confusion matrix:
+    ## 
+    ##            predicted 0 predicted 1 model errors
+    ## actual 0       272.000      34.000        0.111
+    ## actual 1        16.000     293.000        0.052
+    ## use errors       0.056       0.104        0.081
+
+``` r
+# partial dependency plots
+for (i in 1:ncol(X_train)) {
+  pd_plot(bart_mod, i)
+}
+```
+
+    ## ...........
+
+![](Models_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+
+    ## ..
+
+![](Models_files/figure-gfm/unnamed-chunk-8-2.png)<!-- -->
+
+    ## ...........
+
+![](Models_files/figure-gfm/unnamed-chunk-8-3.png)<!-- -->
+
+    ## ...........
+
+![](Models_files/figure-gfm/unnamed-chunk-8-4.png)<!-- -->
+
+    ## ..
+
+![](Models_files/figure-gfm/unnamed-chunk-8-5.png)<!-- -->
+
+    ## ...........
+
+![](Models_files/figure-gfm/unnamed-chunk-8-6.png)<!-- -->
+
+    ## ..
+
+![](Models_files/figure-gfm/unnamed-chunk-8-7.png)<!-- -->
+
+    ## ........
+
+![](Models_files/figure-gfm/unnamed-chunk-8-8.png)<!-- -->
+
+    ## ..
+
+![](Models_files/figure-gfm/unnamed-chunk-8-9.png)<!-- -->
+
+    ## ..
+
+![](Models_files/figure-gfm/unnamed-chunk-8-10.png)<!-- -->
+
+    ## ..
+
+![](Models_files/figure-gfm/unnamed-chunk-8-11.png)<!-- -->
+
+    ## ..
+
+![](Models_files/figure-gfm/unnamed-chunk-8-12.png)<!-- -->
+
+    ## ..
+
+![](Models_files/figure-gfm/unnamed-chunk-8-13.png)<!-- -->
+
+    ## ..
+
+![](Models_files/figure-gfm/unnamed-chunk-8-14.png)<!-- -->
+
+    ## ..
+
+![](Models_files/figure-gfm/unnamed-chunk-8-15.png)<!-- -->
+
+    ## ..
+
+![](Models_files/figure-gfm/unnamed-chunk-8-16.png)<!-- -->
+
+    ## ..
+
+![](Models_files/figure-gfm/unnamed-chunk-8-17.png)<!-- -->
+
+    ## ..
+
+![](Models_files/figure-gfm/unnamed-chunk-8-18.png)<!-- -->
+
+    ## ..
+
+![](Models_files/figure-gfm/unnamed-chunk-8-19.png)<!-- -->
+
+    ## ..
+
+![](Models_files/figure-gfm/unnamed-chunk-8-20.png)<!-- -->
+
+``` r
+p_pred <- 1 - predict(bart_mod, X_test, type = 'prob')
+```
+
+    ## predicting probabilities where "0" is considered the target level...
+
+``` r
+roc <- ROCMetrics$new(y_true = y_test, p_pred = p_pred)
+thresholds <- roc$threshold.matrix(0.001)
+roc$roc_plot(thresholds, file_name = 'plots/bart_roc.png')
+```
+
+![](Models_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+
+``` r
+p_th <- row.names(thresholds)[which(thresholds$`Balanced Accuracy` == max(thresholds$`Balanced Accuracy`))]
+paste0('Optimal threshold: ', max(p_th))
+```
+
+    ## [1] "Optimal threshold: 0.529"
