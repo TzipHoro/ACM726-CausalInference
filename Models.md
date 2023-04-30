@@ -12,9 +12,6 @@ pacman::p_load(dplyr,
                reprtree,
                stargazer
 )
-if(!('reprtree' %in% installed.packages())){
-  devtools::install_github('munoztd0/reprtree')
-}
 
 source('ROC.R')
 source('RFTree.R')
