@@ -12,6 +12,8 @@ pacman::p_load(dplyr,
                skimr,
                gridExtra,
                Rmisc)
+
+as_latex <- FALSE
 ```
 
 # Data
@@ -21,7 +23,11 @@ df <- read.csv(file = file.path('data', 'heart.csv'))
 X <- select(df, -target)
 y <- select(df, target)
 
-skim(df)
+if (as_latex == TRUE) {
+  stargazer::stargazer(skim(df))
+} else {
+  skim(df)
+}
 ```
 
 |                                                  |      |
@@ -74,7 +80,7 @@ for (i in 1:n_cols) {
 }
 
 # png('plots/histograms.png', height = 8.5, width = 11, units = 'in', res = 250)
-multiplot(plotlist = plots, cols = 3)
+multiplot(plotlist = plots, cols = 5)
 ```
 
 ![](DataSummary_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->

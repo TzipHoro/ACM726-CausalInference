@@ -17,6 +17,7 @@ pacman::p_load(dplyr,
 source('ROC.R')
 source('RFTree.R')
 
+as_latex <- FALSE
 set.seed(10)
 ```
 
@@ -59,85 +60,72 @@ ctrl <- trainControl(method = 'cv', number = 5)
 
 ``` r
 lr_mod <- train(factor(target) ~ ., data = df_train, method = 'glm', family = binomial(link = "logit"), trControl = ctrl)
-summary(lr_mod)
+
+if (as_latex == TRUE) {
+  summary(lr_mod)$coefficients %>%
+          stargazer()
+} else {
+  data.frame(summary(lr_mod)$coefficients)
+}
 ```
 
-    ## 
-    ## Call:
-    ## NULL
-    ## 
-    ## Deviance Residuals: 
-    ##     Min       1Q   Median       3Q      Max  
-    ## -2.7682  -0.2963   0.0547   0.4504   3.3091  
-    ## 
-    ## Coefficients:
-    ##                                          Estimate Std. Error z value Pr(>|z|)
-    ## (Intercept)                             -0.641409   2.510612  -0.255  0.79835
-    ## age                                      0.022203   0.018604   1.193  0.23269
-    ## sex                                     -1.748565   0.397958  -4.394 1.11e-05
-    ## `\\`resting blood pressure\\``          -0.019840   0.008550  -2.321  0.02031
-    ## `\\`serum cholesterol\\``               -0.005260   0.002888  -1.821  0.06860
-    ## `\\`fasting blood sugar > 120 mg/dl\\``  0.296628   0.409241   0.725  0.46856
-    ## `\\`maximum heart rate achieved\\``      0.022726   0.009033   2.516  0.01187
-    ## `\\`exercise induced angina\\``         -0.795494   0.329639  -2.413  0.01581
-    ## oldpeak                                 -0.348019   0.180994  -1.923  0.05450
-    ## `\\`chest pain = 1\\``                   0.961956   0.395997   2.429  0.01513
-    ## `\\`chest pain = 2\\``                   2.028971   0.365380   5.553 2.81e-08
-    ## `\\`chest pain = 3\\``                   2.558827   0.579411   4.416 1.00e-05
-    ## `\\`resting electrocardiograph = 1\\``   0.150976   0.281241   0.537  0.59139
-    ## `\\`resting electrocardiograph = 2\\``  -1.160973   2.173118  -0.534  0.59317
-    ## `\\`slope = 1\\``                       -0.619582   0.567822  -1.091  0.27520
-    ## `\\`slope = 2\\``                        0.673433   0.601172   1.120  0.26263
-    ## `\\`major vessels colored = 1\\``       -2.443326   0.359945  -6.788 1.14e-11
-    ## `\\`major vessels colored = 2\\``       -3.271501   0.566718  -5.773 7.80e-09
-    ## `\\`major vessels colored = 3\\``       -2.245028   0.810761  -2.769  0.00562
-    ## `\\`major vessels colored = 4\\``        1.022481   1.355826   0.754  0.45077
-    ## `\\`thalassemia = 1\\``                  2.244612   1.744049   1.287  0.19809
-    ## `\\`thalassemia = 2\\``                  2.269069   1.682617   1.349  0.17749
-    ## `\\`thalassemia = 3\\``                  0.811895   1.682796   0.482  0.62947
-    ##                                            
-    ## (Intercept)                                
-    ## age                                        
-    ## sex                                     ***
-    ## `\\`resting blood pressure\\``          *  
-    ## `\\`serum cholesterol\\``               .  
-    ## `\\`fasting blood sugar > 120 mg/dl\\``    
-    ## `\\`maximum heart rate achieved\\``     *  
-    ## `\\`exercise induced angina\\``         *  
-    ## oldpeak                                 .  
-    ## `\\`chest pain = 1\\``                  *  
-    ## `\\`chest pain = 2\\``                  ***
-    ## `\\`chest pain = 3\\``                  ***
-    ## `\\`resting electrocardiograph = 1\\``     
-    ## `\\`resting electrocardiograph = 2\\``     
-    ## `\\`slope = 1\\``                          
-    ## `\\`slope = 2\\``                          
-    ## `\\`major vessels colored = 1\\``       ***
-    ## `\\`major vessels colored = 2\\``       ***
-    ## `\\`major vessels colored = 3\\``       ** 
-    ## `\\`major vessels colored = 4\\``          
-    ## `\\`thalassemia = 1\\``                    
-    ## `\\`thalassemia = 2\\``                    
-    ## `\\`thalassemia = 3\\``                    
-    ## ---
-    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-    ## 
-    ## (Dispersion parameter for binomial family taken to be 1)
-    ## 
-    ##     Null deviance: 852.56  on 614  degrees of freedom
-    ## Residual deviance: 364.86  on 592  degrees of freedom
-    ## AIC: 410.86
-    ## 
-    ## Number of Fisher Scoring iterations: 6
+    ##                                             Estimate  Std..Error    z.value
+    ## (Intercept)                             -0.641409161 2.510612102 -0.2554792
+    ## age                                      0.022202857 0.018603866  1.1934539
+    ## sex                                     -1.748565190 0.397958373 -4.3938394
+    ## `\\`resting blood pressure\\``          -0.019840038 0.008549714 -2.3205500
+    ## `\\`serum cholesterol\\``               -0.005259987 0.002888466 -1.8210316
+    ## `\\`fasting blood sugar > 120 mg/dl\\``  0.296628496 0.409241424  0.7248252
+    ## `\\`maximum heart rate achieved\\``      0.022726196 0.009032733  2.5159822
+    ## `\\`exercise induced angina\\``         -0.795493587 0.329638746 -2.4132284
+    ## oldpeak                                 -0.348018562 0.180994245 -1.9228156
+    ## `\\`chest pain = 1\\``                   0.961956156 0.395997342  2.4291985
+    ## `\\`chest pain = 2\\``                   2.028971416 0.365379944  5.5530454
+    ## `\\`chest pain = 3\\``                   2.558827238 0.579411262  4.4162539
+    ## `\\`resting electrocardiograph = 1\\``   0.150976047 0.281240594  0.5368217
+    ## `\\`resting electrocardiograph = 2\\``  -1.160973411 2.173117766 -0.5342432
+    ## `\\`slope = 1\\``                       -0.619582236 0.567821889 -1.0911560
+    ## `\\`slope = 2\\``                        0.673433250 0.601171582  1.1202014
+    ## `\\`major vessels colored = 1\\``       -2.443325796 0.359945406 -6.7880455
+    ## `\\`major vessels colored = 2\\``       -3.271500644 0.566718354 -5.7727099
+    ## `\\`major vessels colored = 3\\``       -2.245028195 0.810760680 -2.7690393
+    ## `\\`major vessels colored = 4\\``        1.022481415 1.355826139  0.7541390
+    ## `\\`thalassemia = 1\\``                  2.244612331 1.744048597  1.2870125
+    ## `\\`thalassemia = 2\\``                  2.269069001 1.682617393  1.3485353
+    ## `\\`thalassemia = 3\\``                  0.811895356 1.682795785  0.4824681
+    ##                                             Pr...z..
+    ## (Intercept)                             7.983530e-01
+    ## age                                     2.326916e-01
+    ## sex                                     1.113661e-05
+    ## `\\`resting blood pressure\\``          2.031114e-02
+    ## `\\`serum cholesterol\\``               6.860206e-02
+    ## `\\`fasting blood sugar > 120 mg/dl\\`` 4.685593e-01
+    ## `\\`maximum heart rate achieved\\``     1.187012e-02
+    ## `\\`exercise induced angina\\``         1.581191e-02
+    ## oldpeak                                 5.450321e-02
+    ## `\\`chest pain = 1\\``                  1.513224e-02
+    ## `\\`chest pain = 2\\``                  2.807351e-08
+    ## `\\`chest pain = 3\\``                  1.004261e-05
+    ## `\\`resting electrocardiograph = 1\\``  5.913908e-01
+    ## `\\`resting electrocardiograph = 2\\``  5.931733e-01
+    ## `\\`slope = 1\\``                       2.752043e-01
+    ## `\\`slope = 2\\``                       2.626279e-01
+    ## `\\`major vessels colored = 1\\``       1.136628e-11
+    ## `\\`major vessels colored = 2\\``       7.800669e-09
+    ## `\\`major vessels colored = 3\\``       5.622185e-03
+    ## `\\`major vessels colored = 4\\``       4.507657e-01
+    ## `\\`thalassemia = 1\\``                 1.980899e-01
+    ## `\\`thalassemia = 2\\``                 1.774863e-01
+    ## `\\`thalassemia = 3\\``                 6.294734e-01
 
 ``` r
 p_pred <- predict(lr_mod, X_test, type = 'prob')
 roc <- ROCMetrics$new(y_true = y_test, p_pred = p_pred$`1`)
 thresholds <- roc$threshold.matrix(0.001)
-roc$roc_plot(thresholds, file_name = 'plots/lr_roc.png')
+roc$roc_plot(thresholds, title_prefix = 'Logistic Regression', file_name = 'plots/lr_roc.png')
 ```
 
-![](Models_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+![](C:\Users\tzipo\DOCUME~1\JHU\THEORY~2\ACM726~1\MODELS~1/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
 
 ``` r
 p_th <- row.names(thresholds)[which(thresholds$`Balanced Accuracy` == max(thresholds$`Balanced Accuracy`))]
@@ -167,19 +155,62 @@ rf_mod$finalModel
     ## 1   8 301  0.02588997
 
 ``` r
+tree_df <- randomForest::getTree(rf_mod$finalModel, labelVar=TRUE) %>%
+        head(15)
+if (as_latex == TRUE) {
+  stargazer(tree_df)
+} else {
+  tree_df
+}
+```
+
+    ##    left daughter right daughter                     split var split point
+    ## 1              2              3             `thalassemia = 3`         0.5
+    ## 2              4              5 `maximum heart rate achieved`       113.5
+    ## 3              6              7      `resting blood pressure`       109.0
+    ## 4              0              0                          <NA>         0.0
+    ## 5              8              9                       oldpeak         2.5
+    ## 6             10             11 `maximum heart rate achieved`       155.0
+    ## 7             12             13              `chest pain = 3`         0.5
+    ## 8             14             15                           age        55.5
+    ## 9             16             17                           age        40.5
+    ## 10             0              0                          <NA>         0.0
+    ## 11            18             19              `chest pain = 1`         0.5
+    ## 12            20             21              `chest pain = 2`         0.5
+    ## 13             0              0                          <NA>         0.0
+    ## 14            22             23   `major vessels colored = 3`         0.5
+    ## 15            24             25           `serum cholesterol`       248.5
+    ##    status prediction
+    ## 1       1       <NA>
+    ## 2       1       <NA>
+    ## 3       1       <NA>
+    ## 4      -1          0
+    ## 5       1       <NA>
+    ## 6       1       <NA>
+    ## 7       1       <NA>
+    ## 8       1       <NA>
+    ## 9       1       <NA>
+    ## 10     -1          1
+    ## 11      1       <NA>
+    ## 12      1       <NA>
+    ## 13     -1          1
+    ## 14      1       <NA>
+    ## 15      1       <NA>
+
+``` r
 tree_func(rf_mod$finalModel, 1, file_name = 'plots/rf_tree.png')
 ```
 
-![](Models_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+![](C:\Users\tzipo\DOCUME~1\JHU\THEORY~2\ACM726~1\MODELS~1/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
 ``` r
 p_pred <- predict(rf_mod, X_test, type = 'prob')
 roc <- ROCMetrics$new(y_true = y_test, p_pred = p_pred$`1`)
 thresholds <- roc$threshold.matrix(0.001)
-roc$roc_plot(thresholds, file_name = 'plots/rf_roc.png')
+roc$roc_plot(thresholds, title_prefix = 'Random Forests', file_name = 'plots/rf_roc.png')
 ```
 
-![](Models_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+![](C:\Users\tzipo\DOCUME~1\JHU\THEORY~2\ACM726~1\MODELS~1/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
 ``` r
 p_th <- row.names(thresholds)[which(thresholds$`Balanced Accuracy` == max(thresholds$`Balanced Accuracy`))]
@@ -220,14 +251,14 @@ bart_mod
     ## bartMachine v1.3.3.1 for classification
     ## 
     ## training data size: n = 615 and p = 22 
-    ## built in 1.5 secs on 4 cores, 50 trees, 250 burn-in and 1000 post. samples
+    ## built in 1.6 secs on 4 cores, 50 trees, 250 burn-in and 1000 post. samples
     ## 
     ## confusion matrix:
     ## 
     ##            predicted 0 predicted 1 model errors
-    ## actual 0       271.000      35.000        0.114
+    ## actual 0       278.000      28.000        0.092
     ## actual 1        16.000     293.000        0.052
-    ## use errors       0.056       0.107        0.083
+    ## use errors       0.054       0.087        0.072
 
 ``` r
 # partial dependency plots
@@ -238,83 +269,83 @@ for (i in 1:ncol(X_train)) {
 
     ## ...........
 
-![](Models_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+![](C:\Users\tzipo\DOCUME~1\JHU\THEORY~2\ACM726~1\MODELS~1/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
     ## ..
 
-![](Models_files/figure-gfm/unnamed-chunk-8-2.png)<!-- -->
+![](C:\Users\tzipo\DOCUME~1\JHU\THEORY~2\ACM726~1\MODELS~1/figure-gfm/unnamed-chunk-8-2.png)<!-- -->
 
     ## ...........
 
-![](Models_files/figure-gfm/unnamed-chunk-8-3.png)<!-- -->
+![](C:\Users\tzipo\DOCUME~1\JHU\THEORY~2\ACM726~1\MODELS~1/figure-gfm/unnamed-chunk-8-3.png)<!-- -->
 
     ## ...........
 
-![](Models_files/figure-gfm/unnamed-chunk-8-4.png)<!-- -->
+![](C:\Users\tzipo\DOCUME~1\JHU\THEORY~2\ACM726~1\MODELS~1/figure-gfm/unnamed-chunk-8-4.png)<!-- -->
 
     ## ..
 
-![](Models_files/figure-gfm/unnamed-chunk-8-5.png)<!-- -->
+![](C:\Users\tzipo\DOCUME~1\JHU\THEORY~2\ACM726~1\MODELS~1/figure-gfm/unnamed-chunk-8-5.png)<!-- -->
 
     ## ...........
 
-![](Models_files/figure-gfm/unnamed-chunk-8-6.png)<!-- -->
+![](C:\Users\tzipo\DOCUME~1\JHU\THEORY~2\ACM726~1\MODELS~1/figure-gfm/unnamed-chunk-8-6.png)<!-- -->
 
     ## ..
 
-![](Models_files/figure-gfm/unnamed-chunk-8-7.png)<!-- -->
+![](C:\Users\tzipo\DOCUME~1\JHU\THEORY~2\ACM726~1\MODELS~1/figure-gfm/unnamed-chunk-8-7.png)<!-- -->
 
     ## ........
 
-![](Models_files/figure-gfm/unnamed-chunk-8-8.png)<!-- -->
+![](C:\Users\tzipo\DOCUME~1\JHU\THEORY~2\ACM726~1\MODELS~1/figure-gfm/unnamed-chunk-8-8.png)<!-- -->
 
     ## ..
 
-![](Models_files/figure-gfm/unnamed-chunk-8-9.png)<!-- -->
+![](C:\Users\tzipo\DOCUME~1\JHU\THEORY~2\ACM726~1\MODELS~1/figure-gfm/unnamed-chunk-8-9.png)<!-- -->
 
     ## ..
 
-![](Models_files/figure-gfm/unnamed-chunk-8-10.png)<!-- -->
+![](C:\Users\tzipo\DOCUME~1\JHU\THEORY~2\ACM726~1\MODELS~1/figure-gfm/unnamed-chunk-8-10.png)<!-- -->
 
     ## ..
 
-![](Models_files/figure-gfm/unnamed-chunk-8-11.png)<!-- -->
+![](C:\Users\tzipo\DOCUME~1\JHU\THEORY~2\ACM726~1\MODELS~1/figure-gfm/unnamed-chunk-8-11.png)<!-- -->
 
     ## ..
 
-![](Models_files/figure-gfm/unnamed-chunk-8-12.png)<!-- -->
+![](C:\Users\tzipo\DOCUME~1\JHU\THEORY~2\ACM726~1\MODELS~1/figure-gfm/unnamed-chunk-8-12.png)<!-- -->
 
     ## ..
 
-![](Models_files/figure-gfm/unnamed-chunk-8-13.png)<!-- -->
+![](C:\Users\tzipo\DOCUME~1\JHU\THEORY~2\ACM726~1\MODELS~1/figure-gfm/unnamed-chunk-8-13.png)<!-- -->
 
     ## ..
 
-![](Models_files/figure-gfm/unnamed-chunk-8-14.png)<!-- -->
+![](C:\Users\tzipo\DOCUME~1\JHU\THEORY~2\ACM726~1\MODELS~1/figure-gfm/unnamed-chunk-8-14.png)<!-- -->
 
     ## ..
 
-![](Models_files/figure-gfm/unnamed-chunk-8-15.png)<!-- -->
+![](C:\Users\tzipo\DOCUME~1\JHU\THEORY~2\ACM726~1\MODELS~1/figure-gfm/unnamed-chunk-8-15.png)<!-- -->
 
     ## ..
 
-![](Models_files/figure-gfm/unnamed-chunk-8-16.png)<!-- -->
+![](C:\Users\tzipo\DOCUME~1\JHU\THEORY~2\ACM726~1\MODELS~1/figure-gfm/unnamed-chunk-8-16.png)<!-- -->
 
     ## ..
 
-![](Models_files/figure-gfm/unnamed-chunk-8-17.png)<!-- -->
+![](C:\Users\tzipo\DOCUME~1\JHU\THEORY~2\ACM726~1\MODELS~1/figure-gfm/unnamed-chunk-8-17.png)<!-- -->
 
     ## ..
 
-![](Models_files/figure-gfm/unnamed-chunk-8-18.png)<!-- -->
+![](C:\Users\tzipo\DOCUME~1\JHU\THEORY~2\ACM726~1\MODELS~1/figure-gfm/unnamed-chunk-8-18.png)<!-- -->
 
     ## ..
 
-![](Models_files/figure-gfm/unnamed-chunk-8-19.png)<!-- -->
+![](C:\Users\tzipo\DOCUME~1\JHU\THEORY~2\ACM726~1\MODELS~1/figure-gfm/unnamed-chunk-8-19.png)<!-- -->
 
     ## ..
 
-![](Models_files/figure-gfm/unnamed-chunk-8-20.png)<!-- -->
+![](C:\Users\tzipo\DOCUME~1\JHU\THEORY~2\ACM726~1\MODELS~1/figure-gfm/unnamed-chunk-8-20.png)<!-- -->
 
 ``` r
 p_pred <- 1 - predict(bart_mod, X_test, type = 'prob')
@@ -325,14 +356,14 @@ p_pred <- 1 - predict(bart_mod, X_test, type = 'prob')
 ``` r
 roc <- ROCMetrics$new(y_true = y_test, p_pred = p_pred)
 thresholds <- roc$threshold.matrix(0.001)
-roc$roc_plot(thresholds, file_name = 'plots/bart_roc.png')
+roc$roc_plot(thresholds, title_prefix = 'BART', file_name = 'plots/bart_roc.png')
 ```
 
-![](Models_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+![](C:\Users\tzipo\DOCUME~1\JHU\THEORY~2\ACM726~1\MODELS~1/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
 
 ``` r
 p_th <- row.names(thresholds)[which(thresholds$`Balanced Accuracy` == max(thresholds$`Balanced Accuracy`))]
 paste0('Optimal threshold: ', max(p_th))
 ```
 
-    ## [1] "Optimal threshold: 0.517"
+    ## [1] "Optimal threshold: 0.507"

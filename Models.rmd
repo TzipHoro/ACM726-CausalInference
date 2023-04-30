@@ -21,6 +21,7 @@ pacman::p_load(dplyr,
 source('ROC.R')
 source('RFTree.R')
 
+as_latex <- FALSE
 set.seed(10)
 ```
 
@@ -61,14 +62,20 @@ ctrl <- trainControl(method = 'cv', number = 5)
 # Logistic Regression
 ```{r}
 lr_mod <- train(factor(target) ~ ., data = df_train, method = 'glm', family = binomial(link = "logit"), trControl = ctrl)
-summary(lr_mod)
+
+if (as_latex == TRUE) {
+  summary(lr_mod)$coefficients %>%
+          stargazer()
+} else {
+  data.frame(summary(lr_mod)$coefficients)
+}
 ```
 
 ```{r}
 p_pred <- predict(lr_mod, X_test, type = 'prob')
 roc <- ROCMetrics$new(y_true = y_test, p_pred = p_pred$`1`)
 thresholds <- roc$threshold.matrix(0.001)
-roc$roc_plot(thresholds, file_name = 'plots/lr_roc.png')
+roc$roc_plot(thresholds, title_prefix = 'Logistic Regression', file_name = 'plots/lr_roc.png')
 
 p_th <- row.names(thresholds)[which(thresholds$`Balanced Accuracy` == max(thresholds$`Balanced Accuracy`))]
 paste0('Optimal threshold: ', max(p_th))
@@ -79,6 +86,14 @@ paste0('Optimal threshold: ', max(p_th))
 rf_mod <- train(factor(target) ~ ., data = df_train, method = 'rf', trControl = ctrl)
 rf_mod$finalModel
 
+tree_df <- randomForest::getTree(rf_mod$finalModel, labelVar=TRUE) %>%
+        head(20)
+if (as_latex == TRUE) {
+  stargazer(tree_df)
+} else {
+  tree_df
+}
+
 tree_func(rf_mod$finalModel, 1, file_name = 'plots/rf_tree.png')
 ```
 
@@ -86,7 +101,7 @@ tree_func(rf_mod$finalModel, 1, file_name = 'plots/rf_tree.png')
 p_pred <- predict(rf_mod, X_test, type = 'prob')
 roc <- ROCMetrics$new(y_true = y_test, p_pred = p_pred$`1`)
 thresholds <- roc$threshold.matrix(0.001)
-roc$roc_plot(thresholds, file_name = 'plots/rf_roc.png')
+roc$roc_plot(thresholds, title_prefix = 'Random Forests', file_name = 'plots/rf_roc.png')
 
 p_th <- row.names(thresholds)[which(thresholds$`Balanced Accuracy` == max(thresholds$`Balanced Accuracy`))]
 paste0('Optimal threshold: ', max(p_th))
@@ -112,7 +127,7 @@ for (i in 1:ncol(X_train)) {
 p_pred <- 1 - predict(bart_mod, X_test, type = 'prob')
 roc <- ROCMetrics$new(y_true = y_test, p_pred = p_pred)
 thresholds <- roc$threshold.matrix(0.001)
-roc$roc_plot(thresholds, file_name = 'plots/bart_roc.png')
+roc$roc_plot(thresholds, title_prefix = 'BART', file_name = 'plots/bart_roc.png')
 
 p_th <- row.names(thresholds)[which(thresholds$`Balanced Accuracy` == max(thresholds$`Balanced Accuracy`))]
 paste0('Optimal threshold: ', max(p_th))
