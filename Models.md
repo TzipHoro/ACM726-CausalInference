@@ -220,14 +220,14 @@ bart_mod
     ## bartMachine v1.3.3.1 for classification
     ## 
     ## training data size: n = 615 and p = 22 
-    ## built in 1.6 secs on 4 cores, 50 trees, 250 burn-in and 1000 post. samples
+    ## built in 1.5 secs on 4 cores, 50 trees, 250 burn-in and 1000 post. samples
     ## 
     ## confusion matrix:
     ## 
     ##            predicted 0 predicted 1 model errors
-    ## actual 0       272.000      34.000        0.111
+    ## actual 0       271.000      35.000        0.114
     ## actual 1        16.000     293.000        0.052
-    ## use errors       0.056       0.104        0.081
+    ## use errors       0.056       0.107        0.083
 
 ``` r
 # partial dependency plots
@@ -335,4 +335,4 @@ p_th <- row.names(thresholds)[which(thresholds$`Balanced Accuracy` == max(thresh
 paste0('Optimal threshold: ', max(p_th))
 ```
 
-    ## [1] "Optimal threshold: 0.529"
+    ## [1] "Optimal threshold: 0.517"
