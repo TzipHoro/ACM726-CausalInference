@@ -1,0 +1,96 @@
+---
+title: "Data Summary"
+output:
+  github_document:
+    toc: true
+---
+
+```{r, include = FALSE}
+setwd(r'(C:\Users\tzipo\Documents\JHU\Theory of Statistics 2\ACM726-CausalInference)')
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+```
+
+```{r}
+pacman::p_load(dplyr,
+               fastDummies,
+               caret,
+               reprtree,
+               stargazer
+)
+if(!('reprtree' %in% installed.packages())){
+  devtools::install_github('munoztd0/reprtree')
+}
+
+source('ROC.R')
+source('RFTree.R')
+
+set.seed(10)
+```
+
+# Preprocess Data
+```{r}
+df <- read.csv(file = file.path('data', 'heart.csv'))
+
+# create dummy variables
+df$thal <- as.factor(df$thal)
+df$cp <- as.factor(df$cp)
+df$restecg <- as.factor(df$restecg)
+df$slope <- as.factor(df$slope)
+df$ca <- as.factor(df$ca)
+df <- dummy_cols(df) %>%
+  select('age', 'sex', 'trestbps', 'chol', 'fbs', 'thalach', 'exang', 'oldpeak', 'cp_1', 'cp_2', 'cp_3', 'restecg_1',
+         'restecg_2', 'slope_1', 'slope_2', 'ca_1', 'ca_2', 'ca_3', 'ca_4', 'thal_1', 'thal_2', 'thal_3', 'target')
+
+# rename columns
+colnames(df) <- c('age', 'sex', 'resting blood pressure', 'serum cholesterol', 'fasting blood sugar > 120 mg/dl',
+                 'maximum heart rate achieved', 'exercise induced angina', 'oldpeak', 'chest pain = 1',
+                 'chest pain = 2', 'chest pain = 3', 'resting electrocardiograph = 1', 'resting electrocardiograph = 2',
+                 'slope = 1', 'slope = 2', 'major vessels colored = 1', 'major vessels colored = 2',
+                 'major vessels colored = 3', 'major vessels colored = 4', 'thalassemia = 1', 'thalassemia = 2',
+                 'thalassemia = 3', 'target')
+
+# train/test split
+smp_size <- floor(0.6 * nrow(df))
+train_ind <- sample(seq_len(nrow(df)), size = smp_size)
+
+df_train <- df[train_ind, ]
+df_test <- df[-train_ind, ]
+X_test <- select(df_test, -target)
+y_test <- df_test$target
+
+ctrl <- trainControl(method = 'cv', number = 5)
+```
+
+# Logistic Regression
+```{r}
+lr_mod <- train(factor(target) ~ ., data = df_train, method = 'glm', family = binomial(link = "logit"), trControl = ctrl)
+summary(lr_mod)
+```
+
+```{r}
+p_pred <- predict(lr_mod, X_test, type = 'prob')
+roc <- ROCMetrics$new(y_true = y_test, p_pred = p_pred$`1`)
+thresholds <- roc$threshold.matrix(0.001)
+roc$roc_plot(thresholds, file_name = 'plots/lr_roc.png')
+
+p_th <- row.names(thresholds)[which(thresholds$`Balanced Accuracy` == max(thresholds$`Balanced Accuracy`))]
+paste0('Optimal threshold: ', max(p_th))
+```
+
+# Random Forests
+```{r}
+rf_mod <- train(factor(target) ~ ., data = df_train, method = 'rf', trControl = ctrl)
+rf_mod$finalModel
+
+tree_func(rf_mod$finalModel, 1, file_name = 'plots/rf_tree.png')
+```
+
+```{r}
+p_pred <- predict(rf_mod, X_test, type = 'prob')
+roc <- ROCMetrics$new(y_true = y_test, p_pred = p_pred$`1`)
+thresholds <- roc$threshold.matrix(0.0001)
+roc$roc_plot(thresholds, file_name = 'plots/rf_roc.png')
+
+p_th <- row.names(thresholds)[which(thresholds$`Balanced Accuracy` == max(thresholds$`Balanced Accuracy`))]
+paste0('Optimal threshold: ', max(p_th))
+```

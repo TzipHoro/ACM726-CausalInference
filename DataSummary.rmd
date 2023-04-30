@@ -12,6 +12,8 @@ pacman::p_load(dplyr,
                skimr,
                gridExtra,
                Rmisc)
+
+as_latex <- FALSE
 ```
 
 # Data
@@ -20,7 +22,11 @@ df <- read.csv(file = file.path('data', 'heart.csv'))
 X <- select(df, -target)
 y <- select(df, target)
 
-skim(df)
+if (as_latex == TRUE) {
+  stargazer::stargazer(skim(df))
+} else {
+  skim(df)
+}
 ```
 
 # Histograms
