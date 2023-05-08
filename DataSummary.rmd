@@ -2,14 +2,23 @@
 title: "Data Summary"
 output:
   github_document:
-    toc: true
+    toc: yes
 ---
+
+<style type="text/css">
+.main-container {
+  max-width: 1800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+</style>
 
 ```{r}
 pacman::p_load(dplyr,
                ggplot2,
                ggthemes,
                skimr,
+               xtable,
                gridExtra,
                Rmisc)
 
@@ -23,7 +32,7 @@ X <- select(df, -target)
 y <- select(df, target)
 
 if (as_latex == TRUE) {
-  stargazer::stargazer(skim(df))
+  xtable(skim(df))
 } else {
   skim(df)
 }

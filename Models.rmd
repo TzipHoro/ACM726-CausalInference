@@ -5,6 +5,14 @@ output:
     toc: true
 ---
 
+<style type="text/css">
+.main-container {
+  max-width: 1800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+</style>
+
 ```{r, include = FALSE}
 setwd(r'(C:\Users\tzipo\Documents\JHU\Theory of Statistics 2\ACM726-CausalInference)')
 knitr::opts_chunk$set(warning = FALSE, message = FALSE)
@@ -12,10 +20,11 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 
 ```{r}
 pacman::p_load(dplyr,
+               readr,
                fastDummies,
                caret,
                bartMachine,
-               stargazer
+               xtable
 )
 
 source('ROC.R')
@@ -27,7 +36,7 @@ set.seed(10)
 
 # Preprocess Data
 ```{r}
-df <- read.csv(file = file.path('data', 'heart.csv'))
+df <- read_csv(file = file.path('data', 'heart.csv'), show_col_types = FALSE)
 
 # create dummy variables
 df$thal <- as.factor(df$thal)
@@ -63,11 +72,14 @@ ctrl <- trainControl(method = 'cv', number = 5)
 ```{r}
 lr_mod <- train(factor(target) ~ ., data = df_train, method = 'glm', family = binomial(link = "logit"), trControl = ctrl)
 
+lr_results <- data.frame(summary(lr_mod)$coefficients)
+lr_results$`Odds Ratio` <- exp(lr_results$Estimate)
+
 if (as_latex == TRUE) {
-  summary(lr_mod)$coefficients %>%
-          stargazer()
+  lr_results %>% 
+    xtable()
 } else {
-  data.frame(summary(lr_mod)$coefficients)
+  summary(lr_mod)
 }
 ```
 
@@ -86,10 +98,10 @@ paste0('Optimal threshold: ', max(p_th))
 rf_mod <- train(factor(target) ~ ., data = df_train, method = 'rf', trControl = ctrl)
 rf_mod$finalModel
 
-tree_df <- randomForest::getTree(rf_mod$finalModel, labelVar=TRUE) %>%
-        head(20)
+tree_df <- data.frame(rf_mod$finalModel$importance) %>%
+  arrange(desc(MeanDecreaseGini))
 if (as_latex == TRUE) {
-  stargazer(tree_df)
+  xtable(tree_df)
 } else {
   tree_df
 }
@@ -120,6 +132,15 @@ bart_mod
 # partial dependency plots
 for (i in 1:ncol(X_train)) {
   pd_plot(bart_mod, i)
+}
+
+# variable importance
+var_imp_plot <- investigate_var_importance(bart_mod)
+var_imp <- data.frame(var_imp_plot$avg_var_props)
+if (as_latex == TRUE) {
+  xtable(var_imp)
+} else {
+  var_imp
 }
 ```
 

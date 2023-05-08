@@ -5,11 +5,20 @@ Data Summary
 - [Histograms](#histograms)
 - [Correlations](#correlations)
 
+<style type="text/css">
+.main-container {
+  max-width: 1800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+</style>
+
 ``` r
 pacman::p_load(dplyr,
                ggplot2,
                ggthemes,
                skimr,
+               xtable,
                gridExtra,
                Rmisc)
 
@@ -24,7 +33,7 @@ X <- select(df, -target)
 y <- select(df, target)
 
 if (as_latex == TRUE) {
-  stargazer::stargazer(skim(df))
+  xtable(skim(df))
 } else {
   skim(df)
 }
@@ -80,7 +89,7 @@ for (i in 1:n_cols) {
 }
 
 # png('plots/histograms.png', height = 8.5, width = 11, units = 'in', res = 250)
-multiplot(plotlist = plots, cols = 5)
+multiplot(plotlist = plots, cols = 3)
 ```
 
 ![](DataSummary_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
